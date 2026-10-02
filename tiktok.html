@@ -81,50 +81,70 @@
 </div>
 
 <script>
-  // Brug: tiktok.html?v=mappe/video&a=mappe/avatar&u=brugernavn&t=tekst&m=musik&l=531&c=56&b=14&s=37
-  var q = new URLSearchParams(location.search);
-  var safe = function (p) { return /^[a-z0-9_\-]+(\/[a-z0-9_\-]+)*$/i.test(p || ""); };
-  var $ = function (id) { return document.getElementById(id); };
-  if (safe(q.get("a"))) $("av").style.backgroundImage = "url(" + q.get("a") + ".jpg)";
-  $("user").textContent = q.get("u") || "";
-  // Hashtags vises med fed skrift, som i TikTok
-  (q.get("t") || "").split(/(#[^\s#]+)/).forEach(function (part) {
-    var n = part.charAt(0) === "#" ? document.createElement("b") : document.createTextNode(part);
-    if (part.charAt(0) === "#") n.textContent = part;
-    $("cap").appendChild(n);
-  });
-  $("mu").textContent = q.get("m") || "original lyd";
-  // Faste likes-niveauer, ens for alle videoer: lv=1 (lav), 2 (middel), 3 (høj).
-  // Alternativt r=<deltagerkode 10-81> fra kode.html (eller et andet id, som hashes).
-  // Med vs=video1,video2,... vælger koden også, hvilken video der vises:
-  //   g = (kode - 10) mod (3 * antal videoer); video = g mod antal (0 = første); likes = floor(g / antal) + 1
-  // Uden lv/r bruges tallene fra l, c, b og s i linket.
+  // Brug i surveyen: tiktok.html?r=<deltagerkode 10-81>
+  //   Koden vælger både video (en af de 8 i STIMULI) og likes-kasse:
+  //   g = (kode - 10) mod 24;  video = g mod 8 (0 = første i listen);  likes = floor(g / 8) + 1
+  //   Videoerne står parvis: lige numre (0, 2, 4, 6) = original/kontrol, ulige (1, 3, 5, 7) = AI/treatment.
+  // Til test: p=<id> viser en bestemt video, lv=1/2/3 en bestemt likes-kasse.
+  // Gammel brug virker stadig: v=mappe/video (eller vs=video1,video2), a=, u=, t=, m=, l=, c=, b=, s=.
+  var STIMULI = [
+    { id: "rosa_original",     v: "rosa_detektiv/rosa_original", a: "rosa_detektiv/tiktok_avatar", u: "Rosa Lund",         t: "#fyp", m: "Pink Panther Intro - Henry Mancini" },
+    { id: "rosa_ai",           v: "rosa_detektiv/rosa_ai",       a: "rosa_detektiv/tiktok_avatar", u: "Rosa Lund",         t: "#fyp", m: "Pink Panther Intro - Henry Mancini" },
+    { id: "alex_original",     v: "alex/alex_original",          a: "alex/avatar",                 u: "Liberal Alliance",  t: "#fyp", m: "Do It To It - ACRAZE" },
+    { id: "alex_ai",           v: "alex/alex_ai",                a: "alex/avatar",                 u: "Liberal Alliance",  t: "#fyp", m: "Do It To It - ACRAZE" },
+    { id: "df_moske_original", v: "df_moske/df_moske_original",  a: "df_moske/avatar",             u: "Malte Larsen",      t: "#fyp", m: "original lyd - Malte Larsen" },
+    { id: "df_moske_ai",       v: "df_moske/df_moske_ai",        a: "df_moske/avatar",             u: "Malte Larsen",      t: "#fyp", m: "original lyd - Malte Larsen" },
+    { id: "sikander_original", v: "sikander/sikander_original",  a: "sikander/avatar",             u: "Sikandar Siddique", t: "#fyp", m: "2 Of Amerikaz Most Wanted - 2Pac" },
+    { id: "sikander_ai",       v: "sikander/sikander_ai",        a: "sikander/avatar",             u: "Sikandar Siddique", t: "#fyp", m: "2 Of Amerikaz Most Wanted - 2Pac" }
+  ];
+  // Faste likes-kasser, ens for alle videoer: 1 (lav), 2 (middel), 3 (høj)
   var LEVELS = {
     1: { l: 312,   c: 24,  b: 9,   s: 11 },
     2: { l: 2347,  c: 96,  b: 58,  s: 41 },
     3: { l: 12600, c: 387, b: 412, s: 298 }
   };
+  var q = new URLSearchParams(location.search);
+  var safe = function (p) { return /^[a-z0-9_\-]+(\/[a-z0-9_\-]+)*$/i.test(p || ""); };
+  var $ = function (id) { return document.getElementById(id); };
   function codeNumber(id) {
     if (/^\s*([1-7][0-9]|8[01])\s*$/.test(id)) return parseInt(id, 10) - 10;
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000003;
     return h;
   }
-  var videos = (q.get("vs") || "").split(",").filter(safe);
-  var n = Math.max(videos.length, 1);
-  var lv = parseInt(q.get("lv"), 10), pick = null;
-  if (q.get("r")) {
+
+  // Hvilken liste koden vælger imellem: vs= hvis angivet, ellers STIMULI (medmindre v= er angivet)
+  var list = (q.get("vs") || "").split(",").filter(safe).map(function (v) { return { id: v, v: v }; });
+  if (!list.length && !q.get("v")) list = STIMULI;
+  var n = Math.max(list.length, 1);
+  var lv = parseInt(q.get("lv"), 10), meta = {};
+  if (q.get("p")) list.forEach(function (s) { if (s.id === q.get("p")) meta = s; });
+  if (q.get("r") && list.length) {
     var g = codeNumber(q.get("r")) % (3 * n);
-    if (videos.length) pick = videos[g % n];
+    if (!meta.v) meta = list[g % n];
     if (!(lv >= 1 && lv <= 3)) lv = Math.floor(g / n) + 1;
   }
+  // Værdier i linket går forud for listen
+  ["v", "a", "u", "t", "m"].forEach(function (k) { if (q.get(k)) meta[k] = q.get(k); });
+  document.body.setAttribute("data-stimulus", (meta.id || meta.v || "") + " / likes " + (lv || "-"));
+
+  if (safe(meta.a)) $("av").style.backgroundImage = "url(" + meta.a + ".jpg)";
+  $("user").textContent = meta.u || "";
+  // Hashtags vises med fed skrift, som i TikTok
+  (meta.t || "").split(/(#[^\s#]+)/).forEach(function (part) {
+    var node = part.charAt(0) === "#" ? document.createElement("b") : document.createTextNode(part);
+    if (part.charAt(0) === "#") node.textContent = part;
+    $("cap").appendChild(node);
+  });
+  $("mu").textContent = meta.m || "original lyd";
+
   var preset = LEVELS[lv];
   // Tal vises som i TikTok: 9132, 53.1K, 1.2M
-  function fmt(n) {
-    n = Math.max(0, Math.round(n));
-    if (n < 10000) return String(n);
-    if (n < 1000000) return (Math.round(n / 100) / 10).toString() + "K";
-    return (Math.round(n / 100000) / 10).toString() + "M";
+  function fmt(x) {
+    x = Math.max(0, Math.round(x));
+    if (x < 10000) return String(x);
+    if (x < 1000000) return (Math.round(x / 100) / 10).toString() + "K";
+    return (Math.round(x / 100000) / 10).toString() + "M";
   }
   function count(key) { return fmt(preset ? preset[key] : (parseFloat(q.get(key)) || 0)); }
   $("cl").textContent = count("l");
@@ -133,8 +153,7 @@
   $("cs").textContent = count("s");
 
   var vid = $("vid"), stage = $("stage");
-  var src = pick || (safe(q.get("v")) ? q.get("v") : null);
-  if (src) vid.src = src + ".mp4#t=0.1";
+  if (safe(meta.v)) vid.src = meta.v + ".mp4#t=0.1";
   vid.loop = q.get("loop") !== "0";
   vid.disablePictureInPicture = true;
   vid.oncontextmenu = function () { return false; };
