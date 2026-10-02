@@ -6,17 +6,20 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Deltagerkode</title>
 <style>
-  html, body { margin: 0; height: 100%; background: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #1a1a1a; }
-  body { display: flex; align-items: center; justify-content: center; }
-  .box { text-align: center; padding: 14px 24px; border: 1px solid #d5d8dc; border-radius: 10px; background: #fff; }
-  .lbl { font-size: 14px; color: #555; margin-bottom: 4px; }
-  .code { font: 700 38px/1.1 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 6px; }
+  html, body { margin: 0; padding: 1px; box-sizing: border-box; background: transparent; font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2933; }
+  .box { box-sizing: border-box; width: 100%; max-width: 450px; display: flex; align-items: center; gap: 18px; padding: 14px 16px; border: 1px solid #d8dde3; border-radius: 8px; background: #f7f9fb; }
+  .code { flex: none; min-width: 84px; padding: 8px 14px; border-radius: 6px; background: #fff; border: 1px solid #c9d1da; text-align: center; font: 700 34px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 4px; color: #0b2545; }
+  .txt .h { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .txt .s { font-size: 14px; line-height: 1.4; color: #52606d; }
 </style>
 </head>
 <body>
 <div class="box">
-  <div class="lbl">Din deltagerkode</div>
   <div class="code" id="code"></div>
+  <div class="txt">
+    <div class="h">Din personlige deltagerkode</div>
+    <div class="s">Skriv koden i feltet nedenfor for at fortsætte.</div>
+  </div>
 </div>
 <script>
   // Trækker en tilfældig kode 10-81 (72 koder, deles ligeligt med 3, 6, 9, 12, 18 og 24 grupper = 1, 2, 3, 4, 6 og 8 videoer x 3 likes). Samme kode vises igen, hvis siden genindlæses.
