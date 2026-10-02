@@ -108,6 +108,14 @@
   stage.addEventListener("click", function () { vid.paused ? vid.play() : vid.pause(); });
   vid.addEventListener("play", function () { document.body.classList.add("playing"); });
   vid.addEventListener("pause", function () { document.body.classList.remove("playing"); });
+  // På smalle skærme bliver feltet højere end videoen: vis hele videoen i stedet for at zoome ind
+  function fit() {
+    if (!vid.videoWidth) return;
+    var tall = stage.clientHeight / stage.clientWidth > 1.06 * vid.videoHeight / vid.videoWidth;
+    vid.style.objectFit = tall ? "contain" : "cover";
+  }
+  vid.addEventListener("loadedmetadata", fit);
+  window.addEventListener("resize", fit);
   vid.addEventListener("timeupdate", function () {
     if (vid.duration) $("prog").style.width = (100 * vid.currentTime / vid.duration) + "%";
   });
