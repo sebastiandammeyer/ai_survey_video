@@ -94,16 +94,22 @@
     $("cap").appendChild(n);
   });
   $("mu").textContent = q.get("m") || "original lyd";
-  // Likes-niveau: lv=1 (lav, 10 %), 2 (middel, de rigtige tal) eller 3 (høj, 10x).
+  // Faste likes-niveauer, ens for alle videoer: lv=1 (lav), 2 (middel), 3 (høj).
   // Alternativt r=<respondent-id>, som altid giver samme niveau for samme id (se levelFromId).
+  // Uden lv/r bruges tallene fra l, c, b og s i linket.
+  var LEVELS = {
+    1: { l: 312,   c: 24,  b: 9,   s: 11 },
+    2: { l: 2347,  c: 96,  b: 58,  s: 41 },
+    3: { l: 12600, c: 387, b: 412, s: 298 }
+  };
   function levelFromId(id) {
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000003;
     return h % 3 + 1;
   }
   var lv = parseInt(q.get("lv"), 10);
-  if (!(lv >= 1 && lv <= 3)) lv = q.get("r") ? levelFromId(q.get("r")) : 2;
-  var factor = [0.1, 1, 10][lv - 1];
+  if (!(lv >= 1 && lv <= 3) && q.get("r")) lv = levelFromId(q.get("r"));
+  var preset = LEVELS[lv];
   // Tal vises som i TikTok: 9132, 53.1K, 1.2M
   function fmt(n) {
     n = Math.max(0, Math.round(n));
@@ -111,7 +117,7 @@
     if (n < 1000000) return (Math.round(n / 100) / 10).toString() + "K";
     return (Math.round(n / 100000) / 10).toString() + "M";
   }
-  function count(key) { return fmt((parseFloat(q.get(key)) || 0) * factor); }
+  function count(key) { return fmt(preset ? preset[key] : (parseFloat(q.get(key)) || 0)); }
   $("cl").textContent = count("l");
   $("cc").textContent = count("c");
   $("cb").textContent = count("b");
