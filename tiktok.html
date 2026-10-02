@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>TikTok</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: "Proxima Nova", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+  .app { position: relative; height: 100%; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; background: #000; }
+  .stage { position: relative; flex: 1; overflow: hidden; background: #000; }
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+  .shade-top, .shade-bot { position: absolute; left: 0; right: 0; pointer-events: none; }
+  .shade-top { top: 0; height: 90px; background: linear-gradient(rgba(0,0,0,.35), transparent); }
+  .shade-bot { bottom: 0; height: 200px; background: linear-gradient(transparent, rgba(0,0,0,.45)); }
+  .tabs { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: center; gap: 22px; font-weight: 700; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
+  .tabs span { color: rgba(255,255,255,.65); }
+  .tabs .on { color: #fff; position: relative; }
+  .tabs .on::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 28px; height: 3px; margin-left: -14px; border-radius: 2px; background: #fff; }
+  .search { position: absolute; top: 12px; right: 14px; width: 24px; height: 24px; pointer-events: none; }
+  .side { position: absolute; right: 8px; bottom: 16px; width: 56px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
+  .side .it { display: flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 600; gap: 3px; }
+  .side svg { width: 34px; height: 34px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+  .pf { position: relative; width: 48px; height: 48px; margin-bottom: 8px; }
+  .pf .img { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #fff; background: #888 center/cover no-repeat; }
+  .pf .plus { position: absolute; left: 50%; bottom: -9px; margin-left: -10px; width: 20px; height: 20px; border-radius: 50%; background: #fe2c55; display: grid; place-items: center; font: 700 16px/1 Arial, sans-serif; }
+  .disc { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #555 0 22%, #222 23% 100%); border: 7px solid #2a2a2a; animation: spin 5s linear infinite; animation-play-state: paused; }
+  .playing .disc { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .info { position: absolute; left: 12px; right: 76px; bottom: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.45); pointer-events: none; }
+  .info .user { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+  .info .cap { font-size: 14px; line-height: 1.35; margin-bottom: 8px; }
+  .info .cap b { font-weight: 700; }
+  .info .music { font-size: 14px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; }
+  .info .music svg { width: 14px; height: 14px; flex: none; }
+  .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255,255,255,.25); pointer-events: none; }
+  .bar i { display: block; height: 100%; width: 0; background: #fff; }
+  .big { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; opacity: .85; pointer-events: none; transition: opacity .15s; }
+  .playing .big { opacity: 0; }
+  .nav { height: 56px; flex: none; background: #000; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-around; font-size: 10px; color: rgba(255,255,255,.75); }
+  .nav div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .nav .home { color: #fff; }
+  .nav svg { width: 24px; height: 24px; }
+  .nav .add { width: 44px; height: 28px; border-radius: 8px; background: #fff; position: relative; box-shadow: -3px 0 0 #25f4ee, 3px 0 0 #fe2c55; display: grid; place-items: center; color: #000; font: 700 22px/1 Arial, sans-serif; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage">
+    <video id="vid" playsinline preload="metadata"></video>
+    <div class="shade-top"></div><div class="shade-bot"></div>
+    <div class="tabs"><span>Følger</span><span class="on">For dig</span></div>
+    <svg class="search" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><path d="M16 16l5 5"/></svg>
+    <svg class="big" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="rgba(255,255,255,.9)"/></svg>
+
+    <div class="side">
+      <div class="pf"><div class="img" id="av"></div><div class="plus">+</div></div>
+      <div class="it"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 21.2l-1.4-1.3C5.4 15.2 2 12.1 2 8.3 2 5.2 4.4 2.8 7.5 2.8c1.7 0 3.4.8 4.5 2.1 1.1-1.3 2.8-2.1 4.5-2.1 3.1 0 5.5 2.4 5.5 5.5 0 3.8-3.4 6.9-8.6 11.6z"/></svg><span id="cl"></span></div>
+      <div class="it"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 3C6.5 3 2 6.8 2 11.4c0 2.6 1.4 4.9 3.7 6.4-.2 1.2-.8 2.4-1.7 3.3 2 0 3.9-.7 5.3-1.8.9.2 1.8.3 2.7.3 5.5 0 10-3.8 10-8.4S17.5 3 12 3zm-4.5 9.6a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6zm4.5 0a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6zm4.5 0a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6z"/></svg><span id="cc"></span></div>
+      <div class="it"><svg viewBox="0 0 24 24"><path fill="#fff" d="M6 2.8h12c.9 0 1.6.7 1.6 1.6v16.5c0 .6-.7 1-1.2.6L12 17l-6.4 4.5c-.5.4-1.2 0-1.2-.6V4.4c0-.9.7-1.6 1.6-1.6z"/></svg><span id="cb"></span></div>
+      <div class="it"><svg viewBox="0 0 24 24"><path fill="#fff" d="M13.5 3.5v4.3C6.6 8.6 3 13.4 2.5 20.5c2.3-3.6 5.8-5.4 11-5.4v4.4l8-8z"/></svg><span id="cs"></span></div>
+      <div class="disc"></div>
+    </div>
+
+    <div class="info">
+      <div class="user" id="user"></div>
+      <div class="cap" id="cap"></div>
+      <div class="music"><svg viewBox="0 0 24 24"><path fill="#fff" d="M9 18.5a3 3 0 1 1-2-2.8V5l12-2.5v12a3 3 0 1 1-2-2.8V6.2L9 7.9z"/></svg><span id="mu"></span></div>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+  </div>
+
+  <div class="nav">
+    <div class="home"><svg viewBox="0 0 24 24"><path fill="#fff" d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Hjem</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.6 3.2-6 6.5-6s6 2.4 6.5 6"/><circle cx="17" cy="9" r="2.8"/><path d="M17 14c2.5.2 4.3 2.4 4.6 5"/></svg>Venner</div>
+    <div><span class="add">+</span></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="15" rx="3"/><path d="M8 10h8M8 14h5"/></svg>Indbakke</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 4-6.5 8-6.5s7.3 2.5 8 6.5"/></svg>Profil</div>
+  </div>
+</div>
+
+<script>
+  // Brug: tiktok.html?v=mappe/video&a=mappe/avatar&u=brugernavn&t=tekst&m=musik&l=531&c=56&b=14&s=37
+  var q = new URLSearchParams(location.search);
+  var safe = function (p) { return /^[a-z0-9_\-]+(\/[a-z0-9_\-]+)*$/i.test(p || ""); };
+  var $ = function (id) { return document.getElementById(id); };
+  if (safe(q.get("a"))) $("av").style.backgroundImage = "url(" + q.get("a") + ".jpg)";
+  $("user").textContent = q.get("u") || "";
+  // Hashtags vises med fed skrift, som i TikTok
+  (q.get("t") || "").split(/(#[^\s#]+)/).forEach(function (part) {
+    var n = part.charAt(0) === "#" ? document.createElement("b") : document.createTextNode(part);
+    if (part.charAt(0) === "#") n.textContent = part;
+    $("cap").appendChild(n);
+  });
+  $("mu").textContent = q.get("m") || "original lyd";
+  $("cl").textContent = q.get("l") || "0";
+  $("cc").textContent = q.get("c") || "0";
+  $("cb").textContent = q.get("b") || "0";
+  $("cs").textContent = q.get("s") || "0";
+
+  var vid = $("vid"), stage = $("stage");
+  if (safe(q.get("v"))) vid.src = q.get("v") + ".mp4#t=0.1";
+  vid.loop = q.get("loop") !== "0";
+  vid.disablePictureInPicture = true;
+  vid.oncontextmenu = function () { return false; };
+  // Tryk på videoen starter/pauser, som i TikTok
+  stage.addEventListener("click", function () { vid.paused ? vid.play() : vid.pause(); });
+  vid.addEventListener("play", function () { document.body.classList.add("playing"); });
+  vid.addEventListener("pause", function () { document.body.classList.remove("playing"); });
+  vid.addEventListener("timeupdate", function () {
+    if (vid.duration) $("prog").style.width = (100 * vid.currentTime / vid.duration) + "%";
+  });
+</script>
+</body>
+</html>
