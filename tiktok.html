@@ -95,20 +95,29 @@
   });
   $("mu").textContent = q.get("m") || "original lyd";
   // Faste likes-niveauer, ens for alle videoer: lv=1 (lav), 2 (middel), 3 (høj).
-  // Alternativt r=<respondent-id>, som altid giver samme niveau for samme id (se levelFromId).
+  // Alternativt r=<deltagerkode 1000-9999> fra kode.html (eller et andet id, som hashes).
+  // Med vs=video1,video2,... vælger koden også, hvilken video der vises:
+  //   g = (kode - 1000) mod (3 * antal videoer); video = g mod antal (0 = første); likes = floor(g / antal) + 1
   // Uden lv/r bruges tallene fra l, c, b og s i linket.
   var LEVELS = {
     1: { l: 312,   c: 24,  b: 9,   s: 11 },
     2: { l: 2347,  c: 96,  b: 58,  s: 41 },
     3: { l: 12600, c: 387, b: 412, s: 298 }
   };
-  function levelFromId(id) {
+  function codeNumber(id) {
+    if (/^\s*[1-9][0-9]{3}\s*$/.test(id)) return parseInt(id, 10) - 1000;
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000003;
-    return h % 3 + 1;
+    return h;
   }
-  var lv = parseInt(q.get("lv"), 10);
-  if (!(lv >= 1 && lv <= 3) && q.get("r")) lv = levelFromId(q.get("r"));
+  var videos = (q.get("vs") || "").split(",").filter(safe);
+  var n = Math.max(videos.length, 1);
+  var lv = parseInt(q.get("lv"), 10), pick = null;
+  if (q.get("r")) {
+    var g = codeNumber(q.get("r")) % (3 * n);
+    if (videos.length) pick = videos[g % n];
+    if (!(lv >= 1 && lv <= 3)) lv = Math.floor(g / n) + 1;
+  }
   var preset = LEVELS[lv];
   // Tal vises som i TikTok: 9132, 53.1K, 1.2M
   function fmt(n) {
@@ -124,7 +133,8 @@
   $("cs").textContent = count("s");
 
   var vid = $("vid"), stage = $("stage");
-  if (safe(q.get("v"))) vid.src = q.get("v") + ".mp4#t=0.1";
+  var src = pick || (safe(q.get("v")) ? q.get("v") : null);
+  if (src) vid.src = src + ".mp4#t=0.1";
   vid.loop = q.get("loop") !== "0";
   vid.disablePictureInPicture = true;
   vid.oncontextmenu = function () { return false; };
