@@ -119,8 +119,13 @@
   var n = Math.max(list.length, 1);
   var lv = parseInt(q.get("lv"), 10), meta = {};
   if (q.get("p")) list.forEach(function (s) { if (s.id === q.get("p")) meta = s; });
-  if (q.get("r") && list.length) {
-    var g = codeNumber(q.get("r")) % (3 * n);
+  // Kode: fra r= i linket, ellers den kode kode.html har gemt i browseren (samme github.io-domæne)
+  var rcode = q.get("r") || "";
+  if (!/^\s*([1-7][0-9]|8[01])\s*$/.test(rcode)) {
+    try { var saved = localStorage.getItem("deltagerkode3"); if (saved) rcode = saved; } catch (e) {}
+  }
+  if (rcode && list.length) {
+    var g = codeNumber(rcode) % (3 * n);
     if (!meta.v) meta = list[g % n];
     if (!(lv >= 1 && lv <= 3)) lv = Math.floor(g / n) + 1;
   }
