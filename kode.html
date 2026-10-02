@@ -25,7 +25,9 @@
   // Trækker en tilfældig kode 10-81 (72 koder, deles ligeligt med 3, 6, 9, 12, 18 og 24 grupper = 1, 2, 3, 4, 6 og 8 videoer x 3 likes). Samme kode vises igen, hvis siden genindlæses.
   var KEY = "deltagerkode3";
   var code = null;
-  try { code = localStorage.getItem(KEY); } catch (e) {}
+  // Til test: kode.html?ny=1 trækker altid en ny kode i stedet for at genbruge den gemte
+  var fresh = /[?&]ny=1\b/.test(location.search);
+  if (!fresh) { try { code = localStorage.getItem(KEY); } catch (e) {} }
   if (!/^([1-7][0-9]|8[01])$/.test(code || "")) {
     var n;
     try {
