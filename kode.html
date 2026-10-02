@@ -19,14 +19,14 @@
   <div class="code" id="code"></div>
 </div>
 <script>
-  // Trækker en tilfældig kode 10-99 (90 koder, deles ligeligt med 2, 3, 5, 6, 9 og 18 grupper). Samme kode vises igen, hvis siden genindlæses.
-  var KEY = "deltagerkode2";
+  // Trækker en tilfældig kode 10-81 (72 koder, deles ligeligt med 3, 6, 9, 12, 18 og 24 grupper = 1, 2, 3, 4, 6 og 8 videoer x 3 likes). Samme kode vises igen, hvis siden genindlæses.
+  var KEY = "deltagerkode3";
   var code = null;
   try { code = localStorage.getItem(KEY); } catch (e) {}
-  if (!/^[1-9][0-9]$/.test(code || "")) {
+  if (!/^([1-7][0-9]|8[01])$/.test(code || "")) {
     var r = new Uint32Array(1);
     crypto.getRandomValues(r);
-    code = String(10 + r[0] % 90);
+    code = String(10 + r[0] % 72);
     try { localStorage.setItem(KEY, code); } catch (e) {}
   }
   document.getElementById("code").textContent = code;
