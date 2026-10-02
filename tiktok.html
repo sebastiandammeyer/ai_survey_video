@@ -95,9 +95,9 @@
   });
   $("mu").textContent = q.get("m") || "original lyd";
   // Faste likes-niveauer, ens for alle videoer: lv=1 (lav), 2 (middel), 3 (høj).
-  // Alternativt r=<deltagerkode 1000-9999> fra kode.html (eller et andet id, som hashes).
+  // Alternativt r=<deltagerkode 10-99> fra kode.html (eller et andet id, som hashes).
   // Med vs=video1,video2,... vælger koden også, hvilken video der vises:
-  //   g = (kode - 1000) mod (3 * antal videoer); video = g mod antal (0 = første); likes = floor(g / antal) + 1
+  //   g = (kode - 10) mod (3 * antal videoer); video = g mod antal (0 = første); likes = floor(g / antal) + 1
   // Uden lv/r bruges tallene fra l, c, b og s i linket.
   var LEVELS = {
     1: { l: 312,   c: 24,  b: 9,   s: 11 },
@@ -105,7 +105,7 @@
     3: { l: 12600, c: 387, b: 412, s: 298 }
   };
   function codeNumber(id) {
-    if (/^\s*[1-9][0-9]{3}\s*$/.test(id)) return parseInt(id, 10) - 1000;
+    if (/^\s*[1-9][0-9]\s*$/.test(id)) return parseInt(id, 10) - 10;
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000003;
     return h;
