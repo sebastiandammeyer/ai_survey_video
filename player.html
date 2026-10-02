@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Video</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; }
+  body { display: flex; align-items: center; justify-content: center; }
+  video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+  p { color: #fff; font: 15px/1.4 -apple-system, Helvetica, Arial, sans-serif; padding: 16px; text-align: center; }
+</style>
+</head>
+<body>
+<script>
+  // Brug: player.html?v=rosa_detektiv/rosa_ai  (afspiller rosa_detektiv/rosa_ai.mp4)
+  var v = new URLSearchParams(location.search).get("v") || "";
+  if (/^[a-z0-9_\-]+(\/[a-z0-9_\-]+)*$/i.test(v)) {
+    var el = document.createElement("video");
+    el.src = v + ".mp4";
+    el.controls = true;
+    el.playsInline = true;
+    el.preload = "metadata";
+    el.setAttribute("playsinline", "");
+    el.setAttribute("controlsList", "nodownload noplaybackrate");
+    el.disablePictureInPicture = true;
+    el.oncontextmenu = function () { return false; };
+    document.body.appendChild(el);
+  } else {
+    document.body.innerHTML = "<p>Videoen kunne ikke findes.</p>";
+  }
+</script>
+</body>
+</html>
